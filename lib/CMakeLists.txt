@@ -1,0 +1,1 @@
+add_library(3dArray 3dArray.cpp)
