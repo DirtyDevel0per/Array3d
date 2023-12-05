@@ -1,1 +1,2 @@
-add_library(3dArray 3dArray.cpp)
+add_library(Array3d Array3d.cpp
+        Array3d.h)
