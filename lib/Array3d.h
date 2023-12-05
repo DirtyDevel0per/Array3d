@@ -18,6 +18,8 @@ class uint17_t {
 
   uint17_t& operator=(const uint32_t& rhs);
 
+  uint17_t& operator=(const uint17_t& rhs);
+
   std::ostream& operator<<(std::ostream& stream) const;
 
   std::istream& operator>>(std::istream& stream);
@@ -76,6 +78,8 @@ class Array3d {
   Array3d& operator-(const Array3d& rhs) const;
 
   Array2d operator[](uint32_t index) const;
+
+  size_t GetSize();
 
   static Array3d& MakeArray(uint32_t x, uint32_t y, uint32_t z);
 

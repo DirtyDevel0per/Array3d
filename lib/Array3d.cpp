@@ -51,6 +51,18 @@ uint17_t& uint17_t::operator=(const uint32_t& rhs) {
   return *this;
 }
 
+uint17_t& uint17_t::operator=(const uint17_t& rhs) {
+  size_t byte_index = index_ * 17 / 8;
+  uint8_t offset = 7 - index_ * 17 % 8;
+  for (int i = 0; i < 17; ++i) {
+    array_[byte_index] &= ~(1 << offset);
+    array_[byte_index] |= (rhs.array_[byte_index] >> 16 - i & 1) << offset;
+    offset == 0 ? (offset = 7, ++byte_index) : --offset;
+  }
+
+  return *this;
+}
+
 std::ostream& uint17_t::operator<<(std::ostream& stream) const {
   stream << *this;
   return stream;
@@ -190,6 +202,10 @@ Array3d& Array3d::operator-(const Array3d& rhs) const {
 
 Array2d Array3d::operator[](const uint32_t index) const {
   return {array3d_, index * x_size_, y_size_};
+}
+
+size_t Array3d::GetSize() {
+  return sizeof(*array3d_) + sizeof(*this);
 }
 
 Array3d& Array3d::MakeArray(const uint32_t x, const uint32_t y, const uint32_t z) {

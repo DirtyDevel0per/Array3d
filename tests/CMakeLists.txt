@@ -13,18 +13,18 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(
-        3dArray_tests
-        Array_tests3d.cpp
+        Array3d_tests
+        Array3d_tests.cpp
 )
 
 target_link_libraries(
-        3dArray_tests
-        3dArray
+        Array3d_tests
+        Array3d
         GTest::gtest_main
 )
 
-target_include_directories(3dArray_tests PUBLIC ${PROJECT_SOURCE_DIR})
+target_include_directories(Array3d_tests PUBLIC ${PROJECT_SOURCE_DIR})
 
 include(GoogleTest)
 
-gtest_discover_tests(3dArray_tests)
+gtest_discover_tests(Array3d_tests)
