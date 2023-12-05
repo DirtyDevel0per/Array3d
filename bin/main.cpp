@@ -13,6 +13,7 @@ int main() {
   Array3d array3 = array2 - array;
   k = array3[0][0][0];
   m = array3[0][1][2];
-  std::cout << k << m;
+  //std::cin >> array3[0][1][2];
+  std::cout << array3;
   return 0;
 }

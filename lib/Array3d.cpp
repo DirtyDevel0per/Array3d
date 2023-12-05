@@ -1,6 +1,29 @@
 #include "Array3d.h"
 #include <iostream>
 
+std::istream& operator>>(std::istream& stream, Array3d rhs) {
+  for (size_t i = 0; i < rhs.x_size_; ++i)
+    for (size_t j = 0; j < rhs.y_size_; ++j)
+      for (size_t k = 0; k < rhs.z_size_; ++k)
+        std::cin >> rhs[i][j][k];
+  return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, Array3d& rhs) {
+  for (size_t i = 0; i < rhs.x_size_; ++i)
+    for (size_t j = 0; j < rhs.y_size_; ++j)
+      for (size_t k = 0; k < rhs.z_size_; ++k)
+        stream << rhs[i][j][k] << " ";
+  return stream;
+}
+
+std::istream& operator>>(std::istream& stream, uint17_t rhs) {
+  uint32_t tmp;
+  stream >> tmp;
+  rhs = tmp;
+  return stream;
+}
+
 uint17_t::uint17_t(uint8_t* array, const size_t index) : array_(array), index_(index) {}
 
 uint17_t::operator unsigned() const {
@@ -20,11 +43,17 @@ uint17_t& uint17_t::operator=(const uint32_t& rhs) {
   size_t byte_index = index_ * 17 / 8;
   uint8_t offset = 7 - index_ * 17 % 8;
   for (int i = 0; i < 17; ++i) {
+    array_[byte_index] &= ~(1 << offset);
     array_[byte_index] |= (rhs >> 16 - i & 1) << offset;
     offset == 0 ? (offset = 7, ++byte_index) : --offset;
   }
 
   return *this;
+}
+
+std::ostream& uint17_t::operator<<(std::ostream& stream) const {
+  stream << *this;
+  return stream;
 }
 
 Array::Array(uint8_t* array2d, const size_t offset) : array_(array2d), offset_(offset) {}

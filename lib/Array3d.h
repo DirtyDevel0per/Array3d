@@ -4,6 +4,10 @@
 
 class Array3d;
 class Array2d;
+class uint17_t;
+std::istream& operator>>(std::istream& stream, uint17_t rhs);
+std::istream& operator>>(std::istream& stream, Array3d rhs);
+std::ostream& operator<<(std::ostream& stream, Array3d& rhs);
 
 class uint17_t {
   public:
@@ -13,6 +17,10 @@ class uint17_t {
   operator unsigned() const;
 
   uint17_t& operator=(const uint32_t& rhs);
+
+  std::ostream& operator<<(std::ostream& stream) const;
+
+  std::istream& operator>>(std::istream& stream);
 
   private:
 
@@ -47,6 +55,8 @@ class Array2d {
 };
 
 class Array3d {
+  friend std::istream& operator>>(std::istream& stream, Array3d rhs);
+  friend std::ostream& operator<<(std::ostream& stream, Array3d& rhs);
   public:
 
   Array3d();
