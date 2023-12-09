@@ -27,8 +27,8 @@ std::istream& operator>>(std::istream& stream, uint17_t rhs) {
 uint17_t::uint17_t(uint8_t* array, const size_t index) : array_(array), index_(index) {}
 
 uint17_t::operator unsigned() const {
-  size_t byte_index = index_ * 17 / 8;
-  uint8_t offset = 7 - index_ * 17 % 8;
+  size_t byte_index = (index_ + 1) * 17 / 8;
+  uint8_t offset = 7 - (index_ + 1) * 17 % 8;
   unsigned result = 0;
   for (int i = 0; i < 17; ++i) {
     result <<= 1;
@@ -40,8 +40,8 @@ uint17_t::operator unsigned() const {
 }
 
 uint17_t& uint17_t::operator=(const uint32_t& rhs) {
-  size_t byte_index = index_ * 17 / 8;
-  uint8_t offset = 7 - index_ * 17 % 8;
+  size_t byte_index = (index_ + 1) * 17 / 8;
+  uint8_t offset = 7 - (index_ + 1) * 17 % 8;
   for (int i = 0; i < 17; ++i) {
     array_[byte_index] &= ~(1 << offset);
     array_[byte_index] |= (rhs >> 16 - i & 1) << offset;
@@ -52,13 +52,8 @@ uint17_t& uint17_t::operator=(const uint32_t& rhs) {
 }
 
 uint17_t& uint17_t::operator=(const uint17_t& rhs) {
-  size_t byte_index = index_ * 17 / 8;
-  uint8_t offset = 7 - index_ * 17 % 8;
-  for (int i = 0; i < 17; ++i) {
-    array_[byte_index] &= ~(1 << offset);
-    array_[byte_index] |= (rhs.array_[byte_index] >> 16 - i & 1) << offset;
-    offset == 0 ? (offset = 7, ++byte_index) : --offset;
-  }
+  unsigned tmp = rhs;
+  *this = tmp;
 
   return *this;
 }
@@ -100,66 +95,20 @@ Array3d& Array3d::operator+(const Array3d& rhs) const {
     return *new Array3d();
 
   Array3d* result = new Array3d(x_size_, y_size_, z_size_);
-  size_t byte_index = 0;
-  size_t byte_index_result = 0;
-  uint8_t offset = 0;
-  uint8_t res_offset = 7;
-  for (size_t i = 0; i < x_size_ * y_size_ * z_size_; ++i) {
-    uint32_t tmp_lhs = 0;
-    uint32_t tmp_rhs = 0;
-    for (uint8_t it = 0; it < 17; ++it) {
-      if (offset % 8 == 0 && offset > 0)
-        ++byte_index;
-      tmp_lhs <<= 1;
-      tmp_lhs |= array3d_[byte_index] >> 7 - offset % 8 & 1;
-      tmp_rhs <<= 1;
-      tmp_rhs |= rhs.array3d_[byte_index] >> 7 - offset % 8 & 1;
-      ++offset;
-    }
-
-    const uint32_t tmp_res = tmp_lhs + tmp_rhs;
-
-    for (uint8_t it = 0; it < 17; ++it) {
-      result->array3d_[byte_index_result] |= (tmp_res >> 16 - it & 1) << res_offset;
-      res_offset == 0 ? (res_offset = 7, ++byte_index_result) : --res_offset;
-    }
-
-    offset %= 8;
-    res_offset %= 8;
-  }
+  for (size_t i = 0; i < x_size_; ++i)
+    for (size_t j = 0; j < y_size_; ++j)
+      for (size_t k = 0; k < z_size_; ++k)
+        (*result)[i][j][k] = (*this)[i][j][k] + rhs[i][j][k];
 
   return *result;
 }
 
 Array3d& Array3d::operator*(const uint32_t rhs) const {
   Array3d* result = new Array3d(x_size_, y_size_, z_size_);
-  size_t byte_index = 0;
-  size_t byte_index_result = 0;
-  uint8_t offset = 0;
-  uint8_t res_offset = 7;
-
-  for (size_t i = 0; i < x_size_ * y_size_ * z_size_; ++i) {
-    uint32_t tmp = 0;
-
-    for (uint8_t it = 0; it < 17; ++it) {
-      if (offset % 8 == 0 && offset > 0)
-        ++byte_index;
-      tmp <<= 1;
-      tmp |= array3d_[byte_index] >> 7 - offset % 8 & 1;
-      ++offset;
-    }
-
-    tmp *= rhs;
-
-    for (uint8_t it = 0; it < 17; ++it) {
-      result->array3d_[byte_index_result] |= (tmp >> 16 - it & 1) << res_offset;
-      res_offset == 0 ? (res_offset = 7, ++byte_index_result) : --res_offset;
-    }
-
-    offset %= 8;
-    res_offset %= 8;
-  }
-
+  for (size_t i = 0; i < x_size_; ++i)
+    for (size_t j = 0; j < y_size_; ++j)
+      for (size_t k = 0; k < z_size_; ++k)
+        (*result)[i][j][k] = (*this)[i][j][k] * rhs;
   return *result;
 }
 
@@ -168,40 +117,16 @@ Array3d& Array3d::operator-(const Array3d& rhs) const {
     return *new Array3d();
 
   Array3d* result = new Array3d(x_size_, y_size_, z_size_);
-  size_t byte_index = 0;
-  size_t byte_index_result = 0;
-  uint8_t offset = 0;
-  uint8_t res_offset = 7;
 
-  for (size_t i = 0; i < x_size_ * y_size_ * z_size_; ++i) {
-    uint32_t tmp_lhs = 0;
-    uint32_t tmp_rhs = 0;
-    for (uint8_t it = 0; it < 17; ++it) {
-      if (offset % 8 == 0 && offset > 0)
-        ++byte_index;
-      tmp_lhs <<= 1;
-      tmp_lhs |= array3d_[byte_index] >> 7 - offset % 8 & 1;
-      tmp_rhs <<= 1;
-      tmp_rhs |= rhs.array3d_[byte_index] >> 7 - offset % 8 & 1;
-      ++offset;
-    }
-
-    const uint32_t tmp_res = tmp_lhs - tmp_rhs;
-
-    for (uint8_t it = 0; it < 17; ++it) {
-      result->array3d_[byte_index_result] |= (tmp_res >> 16 - it & 1) << res_offset;
-      res_offset == 0 ? (res_offset = 7, ++byte_index_result) : --res_offset;
-    }
-
-    offset %= 8;
-    res_offset %= 8;
-  }
-
+  for (size_t i = 0; i < x_size_; ++i)
+    for (size_t j = 0; j < y_size_; ++j)
+      for (size_t k = 0; k < z_size_; ++k)
+        (*result)[i][j][k] = (*this)[i][j][k] - rhs[i][j][k];
   return *result;
 }
 
 Array2d Array3d::operator[](const uint32_t index) const {
-  return {array3d_, index * x_size_, y_size_};
+  return {array3d_, index * x_size_ * y_size_, y_size_};
 }
 
 size_t Array3d::GetSize() {
